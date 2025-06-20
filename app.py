@@ -33,6 +33,15 @@ def complete_task(args):
             return
     print("Task ID not found.")
 
+def delete_task(args):
+    tasks = load_tasks()
+    new_tasks = [task for task in tasks if task.id != args.id]
+    if len(tasks) == len(new_tasks):
+        print("Task ID not found.")
+    else:
+        save_tasks(new_tasks)
+        print("Task deleted.")
+
 def main():
     parser = argparse.ArgumentParser(description="CLI Task Manager")
     subparsers = parser.add_subparsers(dest="command")
@@ -50,6 +59,10 @@ def main():
     complete = subparsers.add_parser("complete")
     complete.add_argument("id", type=int)
     complete.set_defaults(func=complete_task)
+
+    delete = subparsers.add_parser("delete")
+    delete.add_argument("id", type=int)
+    delete.set_defaults(func=delete_task)
 
     args = parser.parse_args()
     if hasattr(args, "func"):
