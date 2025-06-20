@@ -23,6 +23,16 @@ def list_tasks(args):
     for task in tasks:
         print(task)
 
+def complete_task(args):
+    tasks = load_tasks()
+    for task in tasks:
+        if task.id == args.id:
+            task.mark_complete()
+            save_tasks(tasks)
+            print("Task marked complete.")
+            return
+    print("Task ID not found.")
+
 def main():
     parser = argparse.ArgumentParser(description="CLI Task Manager")
     subparsers = parser.add_subparsers(dest="command")
@@ -32,6 +42,14 @@ def main():
     add.add_argument("description")
     add.add_argument("--due_date", help="Due date in YYYY-MM-DD format")
     add.set_defaults(func=add_task)
+
+    list_cmd = subparsers.add_parser("list")
+    list_cmd.add_argument("--today", action="store_true")
+    list_cmd.set_defaults(func=list_tasks)
+
+    complete = subparsers.add_parser("complete")
+    complete.add_argument("id", type=int)
+    complete.set_defaults(func=complete_task)
 
     args = parser.parse_args()
     if hasattr(args, "func"):
