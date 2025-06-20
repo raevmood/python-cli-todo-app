@@ -11,6 +11,15 @@ class Task:
     def mark_complete(self):
         self.completed = True
 
+    def to_dict(self):
+        return {
+            "Id": self.id,
+            "Title": self.title,
+            "Description": self.description,
+            "Due Date": self.due_date,
+            "Completed": self.completed
+        }
+
     def __str__(self):
         if self.completed:
           status = "✓"
