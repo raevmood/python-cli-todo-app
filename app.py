@@ -12,15 +12,27 @@ def add_task(args):
     )
     tasks.append(new_task)
     save_tasks(tasks)
-    print("Task added.")
+    print(f"Task '{args.title}' added with ID {new_task.id}.")
 
 def list_tasks(args):
     tasks = load_tasks()
+    
     if args.today:
-        tasks = get_today_tasks(tasks)
-    if not tasks:
-        print("No tasks found today, Take a break!")
-    for task in tasks:
+        tasks_to_show = get_today_tasks(tasks)
+        if not tasks_to_show:
+            print("No tasks due today. Take a break!")
+            return
+        else:
+            print("--- Tasks Due Today ---")
+    else:
+        tasks_to_show = tasks
+        if not tasks_to_show:
+            print("No tasks found. Add one with the 'add' command!")
+            return
+        else:
+            print("--- All Tasks ---")
+
+    for task in tasks_to_show:
         print(task)
 
 def complete_task(args):
@@ -29,7 +41,7 @@ def complete_task(args):
         if task.id == args.id:
             task.mark_complete()
             save_tasks(tasks)
-            print("Task marked complete.")
+            print(f"Task {task.id} marked complete.")
             return
     print("Task ID not found.")
 
@@ -40,35 +52,32 @@ def delete_task(args):
         print("Task ID not found.")
     else:
         save_tasks(new_tasks)
-        print("Task deleted.")
+        print(f"Task {args.id} deleted.")
 
 def main():
     parser = argparse.ArgumentParser(description="CLI Task Manager")
-    subparsers = parser.add_subparsers(dest="command")
+    subparsers = parser.add_subparsers(dest="command", required=True, help="Available commands")
 
-    add = subparsers.add_parser("add")
-    add.add_argument("title")
-    add.add_argument("description")
-    add.add_argument("--due_date", help="Due date in YYYY-MM-DD format")
+    add = subparsers.add_parser("add", help="Add a new task")
+    add.add_argument("title", help="The title of the task")
+    add.add_argument("description", help="The description of the task")
+    add.add_argument("--due_date", help="Optional due date in YYYY-MM-DD format")
     add.set_defaults(func=add_task)
 
-    list_cmd = subparsers.add_parser("list")
-    list_cmd.add_argument("--today", action="store_true")
+    list_cmd = subparsers.add_parser("list", help="List all tasks")
+    list_cmd.add_argument("--today", action="store_true", help="Only show tasks due today")
     list_cmd.set_defaults(func=list_tasks)
 
-    complete = subparsers.add_parser("complete")
-    complete.add_argument("id", type=int)
+    complete = subparsers.add_parser("complete", help="Mark a task as complete")
+    complete.add_argument("id", type=int, help="The ID of the task to complete")
     complete.set_defaults(func=complete_task)
-
-    delete = subparsers.add_parser("delete")
-    delete.add_argument("id", type=int)
+  
+    delete = subparsers.add_parser("delete", help="Delete a task")
+    delete.add_argument("id", type=int, help="The ID of the task to delete")
     delete.set_defaults(func=delete_task)
 
     args = parser.parse_args()
-    if hasattr(args, "func"):
-        args.func(args)
-    else:
-        parser.print_help()
+    args.func(args)
 
 if __name__ == "__main__":
     main()

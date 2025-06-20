@@ -9,7 +9,10 @@ def load_tasks():
     if not os.path.exists(TASK_FILE):
         return []
     with open(TASK_FILE, "r") as f:
-        data = json.load(f)
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            return [] 
     return [Task(**task) for task in data]
 
 def save_tasks(tasks):
@@ -17,11 +20,10 @@ def save_tasks(tasks):
         json.dump([task.to_dict() for task in tasks], f, indent=2)
 
 def generate_id(tasks):
-    for task in tasks:
-        if task.id == max(task.id for task in tasks):
-            return task.id + 1
-        elif not task.id:
-            return 1
+    if not tasks:
+      return 1
+    else:
+      return max(task.id for task in tasks) + 1
 
 def get_today_tasks(tasks):
     today = date.today().isoformat()

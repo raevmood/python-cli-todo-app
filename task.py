@@ -12,12 +12,12 @@ class Task:
         self.completed = True
 
     def to_dict(self):
-        return {
-            "Id": self.id,
-            "Title": self.title,
-            "Description": self.description,
-            "Due Date": self.due_date,
-            "Completed": self.completed
+      return {
+          "id": self.id,
+          "title": self.title,
+          "description": self.description,
+          "due_date": self.due_date,
+          "completed": self.completed
         }
 
     def __str__(self):
