@@ -1,83 +1,117 @@
-import argparse
 from utils import load_tasks, save_tasks, generate_id, get_today_tasks
 from task import Task
 
-def add_task(args):
+def add_task():
+    """Prompts user for task details and adds a new task."""
     tasks = load_tasks()
+    title = input("Enter task title: ")
+    description = input("Enter task description: ")
+    due_date = input("Enter due date (YYYY-MM-DD, optional, press Enter to skip): ")
+
+    if not due_date:
+        due_date = None
+
     new_task = Task(
         id=generate_id(tasks),
-        title=args.title,
-        description=args.description,
-        due_date=args.due_date
+        title=title,
+        description=description,
+        due_date=due_date
     )
     tasks.append(new_task)
     save_tasks(tasks)
-    print(f"Task '{args.title}' added with ID {new_task.id}.")
+    print(f"\nTask '{title}' added with ID {new_task.id}.")
 
-def list_tasks(args):
+def list_tasks(today_only=False):
+    """Lists all tasks or only tasks due today."""
     tasks = load_tasks()
-    
-    if args.today:
+
+    if today_only:
         tasks_to_show = get_today_tasks(tasks)
-        if not tasks_to_show:
-            print("No tasks due today. Take a break!")
-            return
-        else:
-            print("--- Tasks Due Today ---")
+        header = "--- Tasks Due Today ---"
+        no_tasks_message = "No tasks due today. Take a break!"
     else:
         tasks_to_show = tasks
-        if not tasks_to_show:
-            print("No tasks found. Add one with the 'add' command!")
-            return
-        else:
-            print("--- All Tasks ---")
+        header = "--- All Tasks ---"
+        no_tasks_message = "No tasks found. Add one using option '1'!"
 
+    if not tasks_to_show:
+        print(no_tasks_message)
+        return
+
+    print(header)
     for task in tasks_to_show:
         print(task)
 
-def complete_task(args):
+def complete_task():
+    """Marks a specific task as complete after getting an ID from the user."""
+    list_tasks()
     tasks = load_tasks()
+    if not tasks:
+        return
+
+    try:
+        task_id = int(input("\nEnter the ID of the task to mark as complete: "))
+    except ValueError:
+        print("Invalid ID. Please enter a number.")
+        return
+
     for task in tasks:
-        if task.id == args.id:
+        if task.id == task_id:
             task.mark_complete()
             save_tasks(tasks)
             print(f"Task {task.id} marked complete.")
             return
     print("Task ID not found.")
 
-def delete_task(args):
+def delete_task():
+    """Deletes a specific task after getting an ID from the user."""
+    list_tasks()
     tasks = load_tasks()
-    new_tasks = [task for task in tasks if task.id != args.id]
+    if not tasks:
+        return
+
+    try:
+        task_id = int(input("\nEnter the ID of the task to delete: "))
+    except ValueError:
+        print("Invalid ID. Please enter a number.")
+        return
+
+    new_tasks = [task for task in tasks if task.id != task_id]
     if len(tasks) == len(new_tasks):
         print("Task ID not found.")
     else:
         save_tasks(new_tasks)
-        print(f"Task {args.id} deleted.")
+        print(f"Task {task_id} deleted.")
 
 def main():
-    parser = argparse.ArgumentParser(description="CLI Task Manager")
-    subparsers = parser.add_subparsers(dest="command", required=True, help="Available commands")
+    """Main application loop to display menu and handle user choices."""
+    while True:
+        print("\n===== CLI Task Manager =====")
+        print("1. Add a new task")
+        print("2. List all tasks")
+        print("3. List tasks due today")
+        print("4. Mark a task as complete")
+        print("5. Delete a task")
+        print("6. Exit")
+        print("============================")
 
-    add = subparsers.add_parser("add", help="Add a new task")
-    add.add_argument("title", help="The title of the task")
-    add.add_argument("description", help="The description of the task")
-    add.add_argument("--due_date", help="Optional due date in YYYY-MM-DD format")
-    add.set_defaults(func=add_task)
+        choice = input("Enter your choice (1-6): ")
 
-    list_cmd = subparsers.add_parser("list", help="List all tasks")
-    list_cmd.add_argument("--today", action="store_true", help="Only show tasks due today")
-    list_cmd.set_defaults(func=list_tasks)
-
-    complete = subparsers.add_parser("complete", help="Mark a task as complete")
-    complete.add_argument("id", type=int, help="The ID of the task to complete")
-    complete.set_defaults(func=complete_task)
-  
-    delete = subparsers.add_parser("delete", help="Delete a task")
-    delete.add_argument("id", type=int, help="The ID of the task to delete")
-    delete.set_defaults(func=delete_task)
-
-    args = parser.parse_args()
-    args.func(args)
+        if choice == '1':
+            add_task()
+        elif choice == '2':
+            list_tasks()
+        elif choice == '3':
+            list_tasks(today_only=True)
+        elif choice == '4':
+            complete_task()
+        elif choice == '5':
+            delete_task()
+        elif choice == '6':
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please enter a number between 1 and 6.")
 
 if __name__ == "__main__":
     main()
