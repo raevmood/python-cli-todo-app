@@ -11,11 +11,26 @@ Follow the Instructions in the terminal for easy navigaton.
 ## How it Should Look
 ![alt text](<Assets/Screenshot 2025-06-22 220924.png>)
 
-## Setup
-This app has no external dependencies. Written in standard python. Simply run the following commands on your VSstudio code terminal.
+## Installation and Setup
+
+This project is written in standard Python and has no external dependencies. The following steps will guide you through setting up a virtual environment.
+
+**Clone the repository:**
 ```bash
 git clone https://github.com/yourname/python-cli-todo-app
 cd python-cli-todo-app
+```
+
+**Create and activate a virtual environment:**
+This creates an isolated environment for the project.
+
+**On Windows:**
+```bash
 python -m venv venv
 venv\Scripts\activate
-pip install -r requirements.txt
+```
+**On macOS and Linux:**
+```bash
+python -m venv venv
+source venv/bin/activate
+```
